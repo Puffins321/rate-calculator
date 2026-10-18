@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Freelance Rate Calculator: what should you charge per hour?</title>
+<meta name="description" content="Free freelance rate calculator. Enter the income you want, your taxes, expenses and time off, and get the hourly rate, day rate and project quote you need to charge.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%B8%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f5fb; --panel:#ffffff; --ink:#111a40; --muted:#5b6490; --line:#dde0f2;
+  --blue:#3140ff; --amber:#ffb81f; --tax:#ff5a7a; --cost:#9aa2d6;
+  --res:#111a40; --res-ink:#ffffff; --field:#f4f5fb; --btn-ink:#ffffff;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0b1020; --panel:#141b34; --ink:#e9ecff; --muted:#9aa3d1; --line:#263057;
+    --blue:#2433e0; --res:#0a0f26; --res-ink:#f1f3ff; --field:#0e1530; --btn-ink:#ffffff;
+    color-scheme: dark; }
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 "Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+  padding-bottom:env(safe-area-inset-bottom,0px)}
+.hero{background:var(--blue);color:#fff;padding:calc(48px + env(safe-area-inset-top,0px)) 20px 120px}
+.hero-in{max-width:1040px;margin:0 auto}
+h1{margin:0 0 14px;font:800 clamp(2.1rem,6vw,3.7rem)/1.02 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  letter-spacing:-.035em;max-width:15ch}
+.sub{margin:0;max-width:54ch;font-size:1.1rem;color:rgba(255,255,255,.88)}
+.wrap{max-width:1040px;margin:-80px auto 0;padding:0 16px 56px;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:820px){.wrap{grid-template-columns:1fr;padding-bottom:110px}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+.card h2{font-size:1.1rem;margin:0 0 16px;letter-spacing:-.01em}
+label{display:block;font-weight:600;font-size:.94rem;margin:18px 0 6px}
+.card h2+label{margin-top:0}
+.hint{display:block;font-weight:400;color:var(--muted);font-size:.84rem;margin-top:1px}
+input,select{width:100%;padding:12px 14px;font:inherit;color:var(--ink);background:var(--field);
+  border:1.5px solid var(--line);border-radius:9px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+input[type=range]{padding:0;accent-color:var(--blue);height:28px;background:none;border:0}
+.money{position:relative}
+.money .sym{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600;pointer-events:none}
+.money input{padding-left:32px}
+.row{display:flex;gap:14px}.row>div{flex:1;min-width:0}
+.right{display:grid;gap:20px;position:sticky;top:16px}
+@media (max-width:820px){.right{position:static}}
+.result{background:var(--res);color:var(--res-ink);border-radius:14px;padding:26px 24px;border:1px solid rgba(255,255,255,.08)}
+.result .lbl{opacity:.75;font-size:.95rem}
+.big{font:800 clamp(3.6rem,12vw,5.6rem)/.95 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  letter-spacing:-.045em;color:var(--amber);margin:8px 0 4px;font-variant-numeric:tabular-nums}
+.big small{font-size:.28em;letter-spacing:0;color:var(--res-ink);opacity:.75;font-weight:500;margin-left:6px}
+.bar{display:flex;height:14px;border-radius:99px;overflow:hidden;margin:22px 0 4px;background:rgba(255,255,255,.12)}
+.bar span{display:block;height:100%;transition:width .35s ease}
+.ledger{list-style:none;margin:14px 0 0;padding:0;font-variant-numeric:tabular-nums}
+.ledger li{display:flex;align-items:baseline;gap:8px;padding:7px 0}
+.ledger i{flex:1;border-bottom:2px dotted rgba(255,255,255,.22);transform:translateY(-3px)}
+.ledger .dot{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:8px}
+.ledger .total{border-top:1.5px solid rgba(255,255,255,.35);margin-top:6px;padding-top:12px;font-weight:700}
+.ledger .total i{border-bottom-color:transparent}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.two div{background:rgba(255,255,255,.08);border-radius:10px;padding:12px 14px}
+.two b{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}
+.qtotal{font:800 2rem/1.1 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;letter-spacing:-.03em;margin:14px 0 2px;
+  font-variant-numeric:tabular-nums}
+.qsub{color:var(--muted);font-size:.9rem;margin-bottom:14px}
+button{font:inherit;font-weight:700;padding:12px 20px;border:0;border-radius:9px;
+  background:var(--blue);color:var(--btn-ink);cursor:pointer;transition:transform .12s ease}
+button:active{transform:scale(.97)}
+.warn{color:var(--tax);font-size:.92rem;min-height:1.4em;margin:12px 0 0}
+.fine{grid-column:1/-1;color:var(--muted);font-size:.84rem;max-width:72ch;margin:4px 0 0}
+.mbar{display:none}
+@media (max-width:820px){
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;justify-content:space-between;align-items:baseline;
+    background:var(--res);color:var(--res-ink);padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));
+    box-shadow:0 -6px 20px rgba(0,0,0,.25)}
+  .mbar b{font:800 1.6rem "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;color:var(--amber);letter-spacing:-.03em}
+}
+@media (prefers-reduced-motion: reduce){.bar span,button{transition:none}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-in">
+    <h1>Find the rate that actually pays your bills.</h1>
+    <p class="sub">Start with the money you want to take home. We work backward through tax, business costs, time off and unpaid hours to the price you need to charge.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card" aria-label="Your numbers">
+    <h2>Your numbers</h2>
+
+    <label for="cur">Currency
+      <span class="hint">Just a label. It does not convert. Type every amount in your own currency.</span></label>
+    <select id="cur">
+      <option value="$">$ (dollar)</option>
+      <option value="€">€ (euro)</option>
+      <option value="£">£ (pound)</option>
+    </select>
+
+    <label for="take">Take-home pay you want per year
+      <span class="hint">What you keep after tax.</span></label>
+    <div class="money"><span class="sym">$</span><input id="take" type="number" min="0" step="1000" value="60000" inputmode="decimal"></div>
+
+    <label for="exp">Business costs per year
+      <span class="hint">Software, equipment, insurance, accounting, ads.</span></label>
+    <div class="money"><span class="sym">$</span><input id="exp" type="number" min="0" step="100" value="4000" inputmode="decimal"></div>
+
+    <label for="tax">Tax rate: <output id="taxv">25</output>%
+      <span class="hint">Include self-employment tax if you pay it.</span></label>
+    <input id="tax" type="range" min="0" max="50" value="25">
+
+    <div class="row">
+      <div>
+        <label for="weeks">Weeks off per year
+          <span class="hint">Holidays, sick, slow.</span></label>
+        <input id="weeks" type="number" min="0" max="51" value="6" inputmode="numeric">
+      </div>
+      <div>
+        <label for="hrs">Work hours per week</label>
+        <input id="hrs" type="number" min="1" max="80" value="40" inputmode="numeric">
+      </div>
+    </div>
+
+    <label for="bill">Billable share of your hours: <output id="billv">65</output>%
+      <span class="hint">Time you can charge for. Admin, emails and finding clients are unpaid, so 50 to 70 is common.</span></label>
+    <input id="bill" type="range" min="10" max="100" value="65">
+
+    <p class="warn" id="warn" role="status"></p>
+  </section>
+
+  <div class="right">
+    <section class="result" aria-label="Your rate" aria-live="polite">
+      <div class="lbl">Charge at least</div>
+      <div class="big"><span id="hourly">0</span><small>per hour</small></div>
+
+      <div class="bar" aria-hidden="true">
+        <span id="b1" style="background:var(--amber)"></span>
+        <span id="b2" style="background:var(--tax)"></span>
+        <span id="b3" style="background:var(--cost)"></span>
+      </div>
+
+      <ul class="ledger">
+        <li><span><span class="dot" style="background:var(--amber)"></span>You take home</span><i></i><span id="r1"></span></li>
+        <li><span><span class="dot" style="background:var(--tax)"></span>Tax</span><i></i><span id="r2"></span></li>
+        <li><span><span class="dot" style="background:var(--cost)"></span>Business costs</span><i></i><span id="r3"></span></li>
+        <li class="total"><span>Revenue needed per year</span><i></i><span id="r4"></span></li>
+        <li><span>Billable hours per year</span><i></i><span id="r5"></span></li>
+      </ul>
+
+      <div class="two">
+        <div><span class="lbl">Day rate (8 hours)</span><b id="day">0</b></div>
+        <div><span class="lbl">Revenue per month</span><b id="mon">0</b></div>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Quote a project">
+      <h2>Quote a project</h2>
+      <div class="row">
+        <div>
+          <label for="ph">Estimated hours</label>
+          <input id="ph" type="number" min="0" value="20" inputmode="decimal">
+        </div>
+        <div>
+          <label for="buf">Buffer: <output id="bufv">20</output>%</label>
+          <input id="buf" type="range" min="0" max="60" value="20">
+        </div>
+      </div>
+      <div class="qtotal" id="qt">0</div>
+      <div class="qsub" id="qs">Projects nearly always run over, so the buffer protects your rate.</div>
+      <button id="copy" type="button">Copy my rate summary</button>
+      <span id="copied" class="hint" role="status" style="display:inline-block;margin-left:10px"></span>
+    </section>
+  </div>
+
+  <p class="fine">This is a planning estimate, not tax or financial advice. Real taxes depend on where you live and how you are registered, so check with an accountant. Nothing you type leaves your device.</p>
+</main>
+
+<div class="mbar" aria-hidden="true"><span>Charge at least</span><span><b id="mhourly">0</b> / hour</span></div>
+
+<script>
+(function(){
+  var $ = function(id){return document.getElementById(id)};
+  var ids = ["cur","take","exp","tax","weeks","hrs","bill","ph","buf"];
+  var summary = "";
+
+  function num(id){ var v = parseFloat($(id).value); return isFinite(v) && v >= 0 ? v : 0; }
+
+  function render(){
+    var sym = $("cur").value;
+    Array.prototype.forEach.call(document.querySelectorAll(".sym"), function(s){ s.textContent = sym; });
+    var fmt = function(n){ return sym + Number(n).toLocaleString(undefined,{maximumFractionDigits:0}); };
+    var take=num("take"), exp=num("exp"), tax=num("tax"), weeks=Math.min(num("weeks"),51),
+        hrs=num("hrs"), bill=num("bill"), ph=num("ph"), buf=num("buf");
+
+    $("taxv").textContent = tax; $("billv").textContent = bill; $("bufv").textContent = buf;
+
+    var preTax = take / (1 - tax/100);
+    var taxAmt = preTax - take;
+    var revenue = preTax + exp;
+    var bh = (52 - weeks) * hrs * (bill/100);
+
+    var warn = "";
+    if (bh <= 0) warn = "Billable hours come to zero. Raise your work hours or billable share.";
+    else if (hrs * bill/100 > 45) warn = "That is a lot of billable hours per week. Most people cannot sustain it.";
+    $("warn").textContent = warn;
+
+    if (bh <= 0){
+      ["hourly","mhourly","day","mon","qt","r1","r2","r3","r4","r5"].forEach(function(k){$(k).textContent="–"});
+      return;
+    }
+
+    var hourly = revenue / bh;
+    var hr = fmt(Math.ceil(hourly));
+    $("hourly").textContent = hr; $("mhourly").textContent = hr;
+    $("day").textContent = fmt(Math.ceil(hourly*8));
+    $("mon").textContent = fmt(revenue/12);
+    $("r1").textContent = fmt(take); $("r2").textContent = fmt(taxAmt);
+    $("r3").textContent = fmt(exp); $("r4").textContent = fmt(revenue);
+    $("r5").textContent = Math.round(bh).toLocaleString();
+
+    var pct = function(x){ return revenue > 0 ? (x/revenue*100) : 0; };
+    $("b1").style.width = pct(take)+"%";
+    $("b2").style.width = pct(taxAmt)+"%";
+    $("b3").style.width = pct(exp)+"%";
+
+    var quote = hourly * ph * (1 + buf/100);
+    $("qt").textContent = fmt(Math.ceil(quote));
+    $("qs").textContent = ph + " hours at " + hr + " an hour, plus a " + buf + "% buffer.";
+
+    summary = "Freelance rate plan\n" +
+      "Hourly rate: " + hr + "\n" +
+      "Day rate: " + fmt(Math.ceil(hourly*8)) + "\n" +
+      "Revenue needed per year: " + fmt(revenue) + "\n" +
+      "Based on " + fmt(take) + " take-home, " + tax + "% tax, " + fmt(exp) + " costs, " +
+      weeks + " weeks off, " + Math.round(bh) + " billable hours per year.";
+  }
+
+  ids.forEach(function(id){ $(id).addEventListener("input", render); });
+
+  $("copy").addEventListener("click", function(){
+    var done = function(msg){ $("copied").textContent = msg; setTimeout(function(){$("copied").textContent="";},2500); };
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(summary).then(function(){done("Copied.")},
+        function(){done("Your browser blocked copying. Select the numbers by hand.")});
+    } else { done("Copying is not supported here. Select the numbers by hand."); }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
